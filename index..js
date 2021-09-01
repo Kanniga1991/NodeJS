@@ -1,5 +1,6 @@
 //const express = require("express"); // require is an old syntax
-import express from "express";
+import express, { request, response } from "express"; // default export
+import { MongoClient } from "mongodb";// named export
 const app = express();
 
 const users = [
@@ -65,37 +66,84 @@ const users = [
     }
    ];
 
-//CONNECTION TO DB is here
-const url = "mongodb://localhost/flipkart"
+            //CONNECTION TO DB is here
+//const MONGO_URL = "mongodb://localhost";
+const MONGO_URL = "mongodb+srv://KANNIGA:Kanniga1991*@cluster0.agz5n.mongodb.net"
+async function createConnection (){
+const client = new MongoClient(MONGO_URL);
+await client.connect();
+
+// const result = await client (this coding is for displaying brands in console log not in localhost)
+// .db("flipkart")
+// .collection("brands")
+// .find({})
+// .toArray();
+// console.log(result);
+// }
+//createConnection();
+return client;
+}
 
 
-
-
-//CRUD
+            //CRUD
 app.use(express.json()); // middleware - all the body ill be parsed as json
 app.get("/" , (request , response) => {
     response.send("Hello from the server you created , and nodemon helps to restart the server by saving");
 });
-app.get("/users" , (request , response) => {
-    response.send(users);
-});
+            //post method to post a user and just for console log
 app.post("/user" , (request , response) => {
     console.log(request.body);
     response.send({message : "created a user"});
 });
-//for displaying that particular userid if we give in port
-app.get("/users/:id" , (request , response) => {
-    const { id } = request.params;
-    console.log("Requesting for the userid: ", id);
-
-    const ifnotfound = { message : "user not found" };
-    const searchedUser = users.filter((data) => data.id == id)
-    if(searchedUser.length > 0){
-        response.send(searchedUser);
-    } else {
-        response.send(ifnotfound);
-    }    
+            //posting user details from api that will reflect in database a ne collection is added as "users"
+app.post("/users" , async (request , response) => {
+    const usersdata = request.body;
+    const client = await createConnection();
+    const posting_users = 
+    await client.db("flipkart").collection("users").insertMany(usersdata);
+    response.send(posting_users);
 });
+            //here you are getting this brands directly from db i.e, connecting node to db
+app.get("/brands" , async (request , response) => {
+    const client = await createConnection();
+    const display_brands = 
+    await client.db("flipkart").collection("brands").find({}).toArray();
+    response.send(display_brands);
+});
+            //here you are getting user list from db 
+app.get("/users" , async (request , response) => {
+    const client = await createConnection();
+    const display_users = 
+    await client.db("flipkart").collection("users").find({}).toArray();
+    response.send(display_users);
+});
+
+            //here we got user list from const users = [] which is given manually upper part of program
+// app.get("/users" , (request , response) => {
+//     response.send(users);
+// });
+
+            //for displaying that particular userid if we give id number done manually
+// app.get("/users/:id" , (request , response) => {
+//     const { id } = request.params;
+//     console.log("Requesting for the userid: ", id);
+
+//     const ifnotfound = { message : "user not found" };
+//     const searchedUser = users.filter((data) => data.id == id)
+//     if(searchedUser.length > 0){
+//         response.send(searchedUser);
+//     } else {
+//         response.send(ifnotfound);
+//     }    
+// });
+
+            //making user id display from database
+app.get("/users/:userid", async (request , response) =>{
+    const {userid} = request.params;
+    const client = await createConnection();
+    const display_users_id = await client.db("flipkart").collection("users").find({id : userid}).toArray();
+    response.send(display_users_id);
+})
 
 
 app.listen(4001 , () => console.log("The Server is created"));
