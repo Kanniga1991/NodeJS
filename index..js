@@ -68,7 +68,7 @@ const users = [
 
             //CONNECTION TO DB is here
 //const MONGO_URL = "mongodb://localhost";
-const MONGO_URL = "mongodb+srv://KANNIGA:Kanniga1991*@cluster0.agz5n.mongodb.net"
+const MONGO_URL = "mongodb+srv://KANNIGA:@cluster0.agz5n.mongodb.net"
 async function createConnection (){
 const client = new MongoClient(MONGO_URL);
 await client.connect();
