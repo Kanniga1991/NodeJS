@@ -1,7 +1,14 @@
 //const express = require("express"); // require is an old syntax
 import express, { request, response } from "express"; // default export
 import { MongoClient } from "mongodb";// named export
+import cors from "cors"; //for transferring localhost:4001 in nodejs to react app
+import dotenv from "dotenv"; // for password protection 
+dotenv.config();
+
+
 const app = express();
+//const PORT = 4001;
+const PORT = process.env.PORT;
 
 const users = [
     {
@@ -68,7 +75,9 @@ const users = [
 
             //CONNECTION TO DB is here
 //const MONGO_URL = "mongodb://localhost";
-const MONGO_URL = "mongodb+srv://KANNIGA:@cluster0.agz5n.mongodb.net"
+const MONGO_URL = process.env.MONGO_URL;
+//console.log(process.env.MONGO_URL); //display the MONGO_URL passord line in the console
+
 async function createConnection (){
 const client = new MongoClient(MONGO_URL);
 await client.connect();
@@ -86,7 +95,8 @@ return client;
 
 
             //CRUD
-app.use(express.json()); // middleware - all the body ill be parsed as json
+app.use(express.json()); // middleware - all the body will be parsed as json
+app.use(cors());// since we imported cors at the top
 app.get("/" , (request , response) => {
     response.send("Hello from the server you created , and nodemon helps to restart the server by saving");
 });
@@ -146,4 +156,4 @@ app.get("/users/:userid", async (request , response) =>{
 })
 
 
-app.listen(4001 , () => console.log("The Server is created"));
+app.listen(PORT , () => console.log("The Server is created : " , PORT));
